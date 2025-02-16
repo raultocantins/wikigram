@@ -4,6 +4,15 @@ O WikiGram é um aplicativo inovador que combina a dinâmica de vídeos curtos c
 
 ---
 
+## Examples
+
+![Initial Screen](examples/images/1.jpg)
+![Initial Screen](examples/images/2.jpg)
+![Select Search Term](examples/images/3.jpg)
+![Select Language](examples/images/4.jpg)
+
+---
+
 ## 📋 **Requisitos**
 
 Certifique-se de ter os seguintes requisitos instalados para executar o projeto:
