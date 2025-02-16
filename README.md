@@ -6,10 +6,7 @@ O WikiGram é um aplicativo inovador que combina a dinâmica de vídeos curtos c
 
 ## Examples
 
-<img src="examples/images/1.jpg" alt="Initial Screen" width="300">
 <img src="examples/images/2.jpg" alt="Initial Screen" width="300">
-<img src="examples/images/3.jpg" alt="Select Search Term" width="300">
-<img src="examples/images/4.jpg" alt="Select Language" width="300">
 
 ---
 
