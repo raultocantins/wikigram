@@ -1,26 +1,69 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:wikigram/src/core/utils/string_constants.dart';
 import 'package:wikigram/src/core/utils/text_styles.dart';
 import 'package:wikigram/src/features/home/model/post_entity.dart';
 
-class CardPostWidget extends StatelessWidget {
+class CardPostWidget extends StatefulWidget {
   final PostEntity post;
-  const CardPostWidget({required this.post, super.key});
+  const CardPostWidget({
+    required this.post,
+    super.key,
+  });
+
+  @override
+  State<CardPostWidget> createState() => _CardPostWidgetState();
+}
+
+class _CardPostWidgetState extends State<CardPostWidget> {
+  double volume = 1.0;
+  double pitch = 0.7;
+  double rate = 0.5;
+  PlayState playState = PlayState.started;
+  FlutterTts tts = FlutterTts();
+  @override
+  void initState() {
+    super.initState();
+    initTts();
+  }
+
+  Future<void> initTts() async {
+    await _stop();
+    await tts.awaitSpeakCompletion(true);
+    await tts.setVolume(volume);
+    await tts.setSpeechRate(rate);
+    await tts.setPitch(pitch);
+    _speak(widget.post.description);
+  }
+
+  Future<void> _speak(String text) async {
+    setState(() {
+      playState = PlayState.started;
+    });
+    await tts.speak(text);
+  }
+
+  Future<void> _stop() async {
+    setState(() {
+      playState = PlayState.paused;
+    });
+    await tts.stop();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
         Positioned.fill(
-          child: post.imageUrl == null
+          child: widget.post.imageUrl == null
               ? Image.asset(
                   'assets/images/default_image.webp',
                   fit: BoxFit.cover,
                 )
               : Image.network(
-                  post.imageUrl ?? '',
+                  widget.post.imageUrl ?? '',
                   fit: BoxFit.cover,
                 ),
         ),
@@ -50,11 +93,11 @@ class CardPostWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                post.title,
+                widget.post.title,
                 style: title,
               ),
               Text(
-                post.description,
+                widget.post.description,
                 style: description,
                 maxLines: 5,
                 overflow: TextOverflow.ellipsis,
@@ -71,19 +114,35 @@ class CardPostWidget extends StatelessWidget {
                     ),
                     onPressed: () {
                       _launchInBrowser(
-                        post.title,
+                        widget.post.title,
                       );
                     },
                     child: const Text(
                       StringConstants.readMore,
                     ),
                   ),
-                  IconButton(
-                    onPressed: () {
-                      sharePost();
-                    },
-                    icon: const Icon(Icons.share),
-                  ),
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          if (playState == PlayState.started) {
+                            _stop();
+                          } else {
+                            _speak(widget.post.description);
+                          }
+                        },
+                        icon: playState == PlayState.started
+                            ? const Icon(Icons.pause_circle_filled_rounded)
+                            : const Icon(Icons.play_circle_filled_rounded),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          sharePost();
+                        },
+                        icon: const Icon(Icons.share),
+                      ),
+                    ],
+                  )
                 ],
               )
             ],
@@ -95,7 +154,7 @@ class CardPostWidget extends StatelessWidget {
 
   Future<void> _launchInBrowser(String title) async {
     final url = Uri.parse(
-      'https://pt.wikipedia.org/wiki/${post.title.replaceAll(' ', '_')}',
+      'https://pt.wikipedia.org/wiki/${widget.post.title.replaceAll(' ', '_')}',
     );
     if (!await launchUrl(
       url,
@@ -107,7 +166,9 @@ class CardPostWidget extends StatelessWidget {
 
   Future<void> sharePost() async {
     await Share.share(
-      'https://pt.wikipedia.org/wiki/${post.title.replaceAll(' ', '_')}',
+      'https://pt.wikipedia.org/wiki/${widget.post.title.replaceAll(' ', '_')}',
     );
   }
 }
+
+enum PlayState { started, paused }
